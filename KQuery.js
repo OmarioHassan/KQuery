@@ -1,4 +1,4 @@
-// 'use strict';
+'use strict';
 var KKeys = ['init', 'on', 'load', 'addClass', 'removeClass', 'siblings', 'each'];
 class KQuery {
   constructor(selector) {
@@ -65,7 +65,6 @@ class KQuery {
     return siblings;
   }
   each(element, callback) {
-    console.log('this', this);
     if (this.length) {
       for (const el of this) {
         if (el.localName === element) {
