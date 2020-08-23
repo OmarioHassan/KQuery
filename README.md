@@ -10,5 +10,8 @@ it's for training on JavaScript skills
 - addClass()
 - removeClass()
 - siblings()
+- slideDown()
+- slideUp()
+- slideToggle()
 
 ## Waiting for your contribution
