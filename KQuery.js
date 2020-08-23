@@ -1,21 +1,17 @@
-var KKeys = ['init', 'on', 'load', 'addClass', 'removeClass', 'siblings', 'each'];
+'use strict';
+var KKeys = ['init', 'on', 'load', 'addClass', 'removeClass', 'siblings', 'each', 'child', 'slideDown', 'slideUp', 'slideToggle'];
 class KQuery {
   constructor(selector) {
     this.KElement = document.querySelectorAll(selector);
     var arr = [];
     for (var i = this.KElement.length; i--; arr.unshift(this.KElement[i]));
-    this.KElement = arr;
+    arr.length === 1 ? (this.KElement = arr[0]) : (this.KElement = arr);
+
     this.init(this.KElement);
   }
 
   on(eventName, callback) {
-    if (this.length) {
-      for (const el of this) {
-        el.addEventListener(eventName, callback);
-      }
-    } else {
-      this.addEventListener(eventName, callback.bind(null, this));
-    }
+    this.addEventListener(eventName, callback.bind(null, this));
   }
   load(filePath) {
     return fetch(filePath)
@@ -23,7 +19,7 @@ class KQuery {
         return response.text();
       })
       .then((html) => {
-        this[0].insertAdjacentHTML('beforeend', html);
+        this.insertAdjacentHTML('beforeend', html);
       });
   }
   addClass(className) {
@@ -62,6 +58,81 @@ class KQuery {
       }
     }
   }
+  child(el) {
+    const nodes = [...this.children];
+    let childElement;
+    for (const nodeIndex of nodes.keys()) {
+      if (el.toUpperCase() === nodes[nodeIndex].tagName) childElement = nodes[nodeIndex];
+    }
+    if (childElement) this.init(childElement);
+    return childElement;
+  }
+  slideUp(target = this, duration = 500) {
+    target.style.transitionProperty = 'all'; /* [1.1] */
+    target.style.boxSizing = 'border-box'; /* [2] */
+    target.style.height = target.offsetHeight + 'px'; /* [3] */
+    target.style.overflow = 'hidden'; /* [7] */
+    setTimeout(() => {
+      target.style.transitionDuration = duration + 'ms'; /* [1.2] */
+      target.style.height = 0; /* [4] */
+      target.style.paddingTop = 0; /* [5.1] */
+      target.style.paddingBottom = 0; /* [5.2] */
+      target.style.marginTop = 0; /* [6.1] */
+      target.style.marginBottom = 0; /* [7.2] */
+    }, 1);
+    setTimeout(() => {
+      target.style.display = 'none'; /* [8] */
+      target.style.removeProperty('height'); /* [9] */
+      target.style.removeProperty('padding-top'); /* [10.1] */
+      target.style.removeProperty('padding-bottom'); /* [10.2] */
+      target.style.removeProperty('margin-top'); /* [11.1] */
+      target.style.removeProperty('margin-bottom'); /* [11.2] */
+      target.style.removeProperty('overflow'); /* [12] */
+      target.style.removeProperty('transition-duration'); /* [13.1] */
+      target.style.removeProperty('transition-property'); /* [13.2] */
+    }, duration);
+  }
+
+  slideDown(target = this, duration = 500) {
+    target.style.removeProperty('display'); /* [1] */
+    let display = window.getComputedStyle(target).display;
+    if (display === 'none') {
+      /* [2] */
+      display = 'block';
+    }
+    target.style.display = display;
+    let height = target.offsetHeight; /* [3] */
+    target.style.height = 0; /* [4] */
+    target.style.paddingTop = 0; /* [5.1] */
+    target.style.paddingBottom = 0; /* [5.2] */
+    target.style.marginTop = 0; /* [6.1] */
+    target.style.marginBottom = 0; /* [6.2] */
+    target.style.overflow = 'hidden'; /* [7] */
+    target.style.boxSizing = 'border-box'; /* [8] */
+    setTimeout(() => {
+      target.style.transitionProperty = 'all'; /* [9.1] */
+      target.style.transitionDuration = duration + 'ms'; /* [9.2] */
+      target.style.height = height + 'px'; /* [10] */
+      target.style.removeProperty('padding-top'); /* [11.1] */
+      target.style.removeProperty('padding-bottom'); /* [11.2] */
+      target.style.removeProperty('margin-top'); /* [12.1] */
+      target.style.removeProperty('margin-bottom'); /* [12.2] */
+    }, 1);
+    setTimeout(() => {
+      target.style.removeProperty('height'); /* [13] */
+      target.style.removeProperty('overflow'); /* [14] */
+      target.style.removeProperty('transition-duration'); /* [15.1] */
+      target.style.removeProperty('transition-property'); /* [15.2] */
+    }, duration);
+  }
+
+  slideToggle(target = this, duration = 500) {
+    if (window.getComputedStyle(target).display === 'none') {
+      return target.slideDown(target, duration);
+    } else {
+      return target.slideUp(target, duration);
+    }
+  }
   /* Init Function */
   init(el) {
     for (const key of KKeys) {
@@ -70,5 +141,9 @@ class KQuery {
   }
 }
 var $ = (selector) => {
+  if (selector.innerHTML) {
+    if (!selector.className.includes('KQ')) selector.classList.add(`KQ_${Math.ceil(Math.random() * 5000)}`);
+    selector = selector.className ? '.' + selector.className.replace(/ /, '.') : '#' + selector.id;
+  }
   return new KQuery(selector).KElement;
 };
