@@ -1,29 +1,11 @@
-'use strict';
 var KKeys = ['init', 'on', 'load', 'addClass', 'removeClass', 'siblings', 'each'];
 class KQuery {
   constructor(selector) {
-    const selectorKey = selector.split('')[0];
-    switch (true) {
-      case selector.includes('>'):
-        this.KElement = this.#querySelector(selector);
-        break;
-      case selectorKey === '.':
-        this.KElement = this.#getElementsByClassName(selector.slice(1));
-        break;
-      case selectorKey === '#':
-        this.KElement = this.#getElementById(selector.slice(1));
-        break;
-      default:
-        if (this.#getElementsByTagName(selector)) this.KElement = this.#getElementsByTagName(selector);
-        else console.error('wrong element');
-        break;
-    }
+    this.KElement = document.querySelectorAll(selector);
+    var arr = [];
+    for (var i = this.KElement.length; i--; arr.unshift(this.KElement[i]));
+    this.KElement = arr;
     this.init(this.KElement);
-    if (this.KElement.length) {
-      for (const el of this.KElement) {
-        this.init(el);
-      }
-    }
   }
 
   on(eventName, callback) {
@@ -46,7 +28,13 @@ class KQuery {
   }
   addClass(className) {
     this.init(this.addClass);
-    this.classList.add(className);
+    if (this.length) {
+      for (const el of this) {
+        el.classList.add(className);
+      }
+    } else {
+      this.classList.add(className);
+    }
     return this;
   }
   removeClass(className) {
@@ -79,19 +67,6 @@ class KQuery {
     for (const key of KKeys) {
       el.__proto__[key] = this[key];
     }
-  }
-
-  #getElementById(selector) {
-    return document.getElementById(selector);
-  }
-  #getElementsByClassName(selector) {
-    return document.getElementsByClassName(selector);
-  }
-  #getElementsByTagName(selector) {
-    return document.getElementsByTagName(selector);
-  }
-  #querySelector(selector) {
-    return document.querySelectorAll(selector);
   }
 }
 var $ = (selector) => {
